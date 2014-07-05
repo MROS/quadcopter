@@ -131,7 +131,9 @@ class motor(object):
         # Set servo to xxx us
         if self.powered:
             self.__IO.set_servo(self.__pin, PW)
-
+	def set_speed(s):
+		self.__W = s
+		self.serW(s)
 
 
 
