@@ -120,7 +120,6 @@ class motor(object):
 
     def setW(self, W):
         "Checks W% is between limits than sets it"
-        print("width now is " + str(W) + " \n.")
         PW = 0
         self.__W = W
         if self.__W < self.__WMin:
@@ -131,9 +130,6 @@ class motor(object):
         # Set servo to xxx us
         if self.powered:
             self.__IO.set_servo(self.__pin, PW)
-	def set_speed(s):
-		self.__W = s
-		self.serW(s)
-
-
-
+    def set_speed(self, s):
+        self.__W = s
+        self.setW(s)
