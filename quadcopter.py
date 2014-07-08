@@ -1,4 +1,5 @@
 from motor import motor
+import time
 
 # It's seems that raspberry can't identify Chinese(I have not try to adjust), so I use Englist temporarily.
 # motor class has limited lots of functions, but You Just need to konw:
@@ -10,15 +11,15 @@ from motor import motor
 
 class quadcopter(object):
 	def __init__(self):
-		self.motors = {'left' : motor('left', 17, simulation=False),
-		 'right' : motor('right', 21, simulation=False),
-		 'rear' : motor('rear', 23, simulation=False),
-		 'front' : motor('front', 24, simulation=False) }
+		self.motors = {'left' : motor('left', 25, simulation=False),
+		 'right' : motor('right', 23, simulation=False),
+		 'rear' : motor('rear', 24, simulation=False),
+		 'front' : motor('front', 22, simulation=False) }
 	def init_motor(self):
 		print('***Disconnect ESC power')
 		print('***then press ENTER')
 		res = raw_input()
-		for (name, mo) in self.motors.values():
+		for mo in self.motors.values():
 			mo.start()
 			mo.setW(100)
 		#NOTE:the angular motor speed W can vary from 0 (min) to 100 (max)
@@ -27,11 +28,19 @@ class quadcopter(object):
 		print('***Wait beep-beep')
 		print('***then press ENTER')
 		res = raw_input()
-		mymotor.setW(0)
+		for mo in self.motors.values():
+			mo.setW(0)
+		print('***Wait N beep for battery cell')
+		print('***Wait beeeeeep for ready')
+		print('***then press ENTER')
+		res = raw_input()
 
 	def set_all_to(self, s):
 		for mo in self.motors.values():
 			mo.set_speed(s)
+	def stop(self):
+		for mo in self.motors.values():
+			mo.set_speed(0)
 
 	def set_unique_to(self, mo, s):
 		self.motors[mo].set_speed(s)

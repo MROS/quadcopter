@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 from quadcopter import quadcopter
 
 my_quadcopter = quadcopter()
@@ -19,7 +20,7 @@ def controller():
 		elif command[0] in direction_map:
 			[mo_short, speed] = command.split(' ')
 			mo = direction_map[command[0]]
-			my_quadcopter.set_unique_to(mo, speed)
+			my_quadcopter.set_unique_to(mo, int(speed))
 		else:
 			print("wrong command!!!!\n")
 
