@@ -1,4 +1,13 @@
-console.log("Hello?");
+var wSocket = new WebSocket("ws://localhost:8888/ws");
+
+wSocket.onopen = function(){
+	wSocket.send("who are you?");
+}
+wSocket.onmessage = function(event){
+	console.log(event.data);
+}
+
+
 
 //document.onkeypress = function(event){
 //            var chCode = event.charCode;
@@ -24,19 +33,14 @@ var keyMapDir = {
 
 document.onkeydown = function(event){
             var chCode = event.keyCode;
-            console.log(typeof(chCode));
-            console.log("down");
-            console.log(chCode);
             var dir = keyMapDir[chCode];
             if (dir != null) {
                 changeColor[dir]();
+				//wSocket.send(dir + "_add")
             }
 }
 document.onkeyup = function(event){
             var chCode = event.keyCode;
-            console.log(typeof(chCode));
-            console.log("up");
-            console.log(chCode);
             var dir = keyMapDir[chCode];
             if (dir != null) {
                 changeBackColor[dir]();
