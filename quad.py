@@ -9,7 +9,7 @@ import time
 # motor::getW is the current speed in this motor
 # Once you know these, you can start to write your control process! Such as balance, and all kinds of moving.
 
-class Qued():
+class Quad():
     PIN_FL = 22
     PIN_FR = 23
     PIN_BR = 24
@@ -67,3 +67,4 @@ class Qued():
         for w in range(s, 1, -1):
             self.set_all_to(w)
             time.sleep(0.5)
+
