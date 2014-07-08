@@ -1,0 +1,74 @@
+/*
+body {
+    margin:0;
+    padding:0;
+    background-image: url(http://thumbs.dreamstime.com/z/%E7%BE%BD%E6%AF%9B-1132643.jpg);
+    -moz-background-size: cover;
+    background-size: cover;
+}
+*/
+
+#image {
+    margin-top: 30px;
+    margin-left: 40px;
+    float: left;
+}
+
+#control {
+    margin-top: 80px;
+    position: relative;
+    float: left;
+    background-color: #000;
+}
+
+#arrow-up {
+    position: absolute;
+    float: left;
+    top: 0px;
+    left: 150px;
+    width: 0; 
+    height: 0; 
+    border-left: 80px solid transparent;
+    border-right: 80px solid transparent;
+    
+    border-bottom: 80px solid blue;
+}
+
+#arrow-down {
+    position: absolute;
+    float: left;
+    top: 180px;
+    left: 150px;
+    width: 0; 
+    height: 0; 
+    border-left: 80px solid transparent;
+    border-right: 80px solid transparent;
+    
+    border-top: 80px solid blue;
+}
+
+#arrow-right {
+    position: absolute;
+    float: left;
+    top: 50px;
+    left: 325px;
+    width: 0; 
+    height: 0; 
+    border-top: 80px solid transparent;
+    border-bottom: 80px solid transparent;
+    
+    border-left: 80px solid blue;
+}
+
+#arrow-left {
+    position: absolute;
+    float: left;
+    top: 50px;
+    left: 55px;
+    width: 0; 
+    height: 0; 
+    border-top: 80px solid transparent;
+    border-bottom: 80px solid transparent; 
+    
+    border-right:80px solid blue; 
+}
