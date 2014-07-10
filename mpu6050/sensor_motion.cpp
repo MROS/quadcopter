@@ -318,7 +318,7 @@ mpu60050_get_z_gyro_offset(PyObject *self, PyObject *args)
 static PyObject *
 mpu60050_set_x_gyro_offset(PyObject *self, PyObject *args)
 {
-    unsigned char offset;
+    char offset;
     if(!PyArg_ParseTuple(args, "b", &offset))
 	return NULL;
     mpu.setXGyroOffset(offset);
@@ -328,7 +328,7 @@ mpu60050_set_x_gyro_offset(PyObject *self, PyObject *args)
 static PyObject *
 mpu60050_set_y_gyro_offset(PyObject *self, PyObject *args)
 {
-    unsigned char offset;
+    char offset;
     if(!PyArg_ParseTuple(args, "b", &offset))
 	return NULL;
     mpu.setYGyroOffset(offset);
@@ -338,7 +338,7 @@ mpu60050_set_y_gyro_offset(PyObject *self, PyObject *args)
 static PyObject *
 mpu60050_set_z_gyro_offset(PyObject *self, PyObject *args)
 {
-    unsigned char offset;
+    char offset;
     if(!PyArg_ParseTuple(args, "b", &offset))
 	return NULL;
     mpu.setZGyroOffset(offset);
@@ -366,7 +366,7 @@ mpu60050_get_z_accel_offset(PyObject *self, PyObject *args)
 static PyObject *
 mpu60050_set_x_accel_offset(PyObject *self, PyObject *args)
 {
-    unsigned char offset;
+    short int offset;
     if(!PyArg_ParseTuple(args, "h", &offset))
 	return NULL;
     mpu.setXAccelOffset(offset);
@@ -376,7 +376,7 @@ mpu60050_set_x_accel_offset(PyObject *self, PyObject *args)
 static PyObject *
 mpu60050_set_y_accel_offset(PyObject *self, PyObject *args)
 {
-    unsigned char offset;
+    short int offset;
     if(!PyArg_ParseTuple(args, "h", &offset))
 	return NULL;
     mpu.setYAccelOffset(offset);
@@ -386,7 +386,7 @@ mpu60050_set_y_accel_offset(PyObject *self, PyObject *args)
 static PyObject *
 mpu60050_set_z_accel_offset(PyObject *self, PyObject *args)
 {
-    unsigned char offset;
+    short int offset;
     if(!PyArg_ParseTuple(args, "h", &offset))
 	return NULL;
     mpu.setZAccelOffset(offset);
