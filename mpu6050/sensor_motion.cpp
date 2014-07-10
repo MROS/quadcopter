@@ -120,8 +120,7 @@ mpu6050_initialize(PyObject *self, PyObject *args)
         // (if it's going to break, usually the code will be 1)
         // printf("DMP Initialization failed (code %d)\n", devStatus);
 	char err_str[64];
-        snprintf(err_str, sizeof(err_str), "DMP Initialization failed (code %d)\n", devStatus);
-	PyErr_SetString(PyExc_ValueError, err_str);
+	PyErr_Format(PyExc_ValueError, "DMP Initialization failed (code %d)", devStatus);
 	return NULL;
     }
 
