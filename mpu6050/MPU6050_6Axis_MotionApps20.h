@@ -351,14 +351,14 @@ uint8_t MPU6050::dmpInitialize() {
     DEBUG_PRINT(MPU6050_DMP_CODE_SIZE);
     DEBUG_PRINTLN(F(" bytes)"));
     if (writeProgMemoryBlock(dmpMemory, MPU6050_DMP_CODE_SIZE)) {
-        printf("Success! DMP code written and verified.\n");
+        // printf("Success! DMP code written and verified.\n");
 
         // write DMP configuration
         DEBUG_PRINT(F("Writing DMP configuration to MPU memory banks ("));
         DEBUG_PRINT(MPU6050_DMP_CONFIG_SIZE);
         DEBUG_PRINTLN(F(" bytes in config def)"));
         if (writeProgDMPConfigurationSet(dmpConfig, MPU6050_DMP_CONFIG_SIZE)) {
-            printf("Success! DMP configuration written and verified.\n");
+            // printf("Success! DMP configuration written and verified.\n");
 
             DEBUG_PRINTLN(F("Setting clock source to Z Gyro..."));
             setClockSource(MPU6050_CLOCK_PLL_ZGYRO);
@@ -412,7 +412,7 @@ uint8_t MPU6050::dmpInitialize() {
             uint8_t fifoCount = getFIFOCount();
             uint8_t fifoBuffer[128];
 
-            printf("Current FIFO count=%d\n", fifoCount);
+            // printf("Current FIFO count=%d\n", fifoCount);
             DEBUG_PRINTLN(fifoCount);
             if (fifoCount > 0)
 		getFIFOBytes(fifoBuffer, fifoCount);
@@ -453,10 +453,10 @@ uint8_t MPU6050::dmpInitialize() {
             for (j = 0; j < 4 || j < dmpUpdate[2] + 3; j++, pos++) dmpUpdate[j] = pgm_read_byte(&dmpUpdates[pos]);
             writeMemoryBlock(dmpUpdate + 3, dmpUpdate[2], dmpUpdate[0], dmpUpdate[1]);
 
-            printf("Waiting for FIFO count > 2...\n");
+            // printf("Waiting for FIFO count > 2...\n");
             while ((fifoCount = getFIFOCount()) < 3);
 
-            printf("Current FIFO count=%d",fifoCount);
+            // printf("Current FIFO count=%d",fifoCount);
             DEBUG_PRINTLN(fifoCount);
             DEBUG_PRINTLN(F("Reading FIFO data..."));
             getFIFOBytes(fifoBuffer, fifoCount);
