@@ -251,33 +251,27 @@ mpu6050_get_linear_accel(PyObject *self, PyObject *args)
 	PyErr_SetString(PyExc_ValueError, "DMP not ready");
 	return NULL;
     }
-    // get current FIFO count
-    fifoCount = mpu.getFIFOCount();
 
-    if (fifoCount == 1024)
+    while(1)
     {
-        // reset so we can continue cleanly
-        mpu.resetFIFO();
-        // printf("FIFO overflow!\n");
-	PyErr_SetString(PyExc_ValueError, "FIFO overflow");
-	return NULL;
-	// otherwise, check for DMP data ready interrupt (this should happen frequently)
-    }
-    else if (fifoCount >= 42)
-    {
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
+	// get current FIFO count
+	fifoCount = mpu.getFIFOCount();
 
-	mpu.dmpGetQuaternion(&q, fifoBuffer);
-	mpu.dmpGetAccel(&aa, fifoBuffer);
-	mpu.dmpGetGravity(&gravity, &q);
-	mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
-	return Py_BuildValue("(i, i, i)", aaReal.x, aaReal.y, aaReal.z);
-    }
-    else
-    {
-	PyErr_SetString(PyExc_ValueError, "");
-	return NULL;
+	if (fifoCount < 24)
+	    usleep(100000);
+	else if(fifoCount == 1024)
+	{
+            mpu.resetFIFO();
+	    usleep(100000);
+	}
+	else
+	{
+	    mpu.dmpGetQuaternion(&q, fifoBuffer);
+	    mpu.dmpGetAccel(&aa, fifoBuffer);
+	    mpu.dmpGetGravity(&gravity, &q);
+	    mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+	    return Py_BuildValue("(i, i, i)", aaReal.x, aaReal.y, aaReal.z);
+	}
     }
 }
 
@@ -290,32 +284,27 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
 	PyErr_SetString(PyExc_ValueError, "DMP not ready");
 	return NULL;
     }
-    // get current FIFO count
-    fifoCount = mpu.getFIFOCount();
 
-    if (fifoCount == 1024)
+    while(1)
     {
-        // reset so we can continue cleanly
-        mpu.resetFIFO();
-	PyErr_SetString(PyExc_ValueError, "FIFO overflow");
-	return NULL;
-	// otherwise, check for DMP data ready interrupt (this should happen frequently)
-    }
-    else if (fifoCount >= 42)
-    {
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
+	// get current FIFO count
+	fifoCount = mpu.getFIFOCount();
 
-	mpu.dmpGetQuaternion(&q, fifoBuffer);
-	mpu.dmpGetAccel(&aa, fifoBuffer);
-	mpu.dmpGetGravity(&gravity, &q);
-	mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
-	return Py_BuildValue("(i, i, i)", aaWorld.x, aaWorld.y, aaWorld.z);
-    }
-    else
-    {
-	PyErr_SetString(PyExc_ValueError, "");
-	return NULL;
+	if (fifoCount < 24)
+	    usleep(100000);
+	else if(fifoCount == 1024)
+	{
+            mpu.resetFIFO();
+	    usleep(100000);
+	}
+	else
+	{
+	    mpu.dmpGetQuaternion(&q, fifoBuffer);
+	    mpu.dmpGetAccel(&aa, fifoBuffer);
+	    mpu.dmpGetGravity(&gravity, &q);
+	    mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+	    return Py_BuildValue("(i, i, i)", aaWorld.x, aaWorld.y, aaWorld.z);
+	}
     }
 }
 
