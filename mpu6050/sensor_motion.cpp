@@ -37,6 +37,12 @@ static PyObject *mpu6050_get_euler(PyObject *self, PyObject *args);
 static PyObject *mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args);
 static PyObject *mpu6050_get_linear_accel(PyObject *self, PyObject *args);
 static PyObject *mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args);
+static PyObject *mpu60050_get_x_gyro_offset(PyObject *self, PyObject *args);
+static PyObject *mpu60050_get_y_gyro_offset(PyObject *self, PyObject *args);
+static PyObject *mpu60050_get_z_gyro_offset(PyObject *self, PyObject *args);
+static PyObject *mpu60050_set_x_gyro_offset(PyObject *self, PyObject *args);
+static PyObject *mpu60050_set_y_gyro_offset(PyObject *self, PyObject *args);
+static PyObject *mpu60050_set_z_gyro_offset(PyObject *self, PyObject *args);
 
 static PyMethodDef methods[] = {
     {"initialize",  mpu6050_initialize, METH_NOARGS,
@@ -51,6 +57,18 @@ static PyMethodDef methods[] = {
      "Get linear acceleration"},
     {"get_linear_accel_in_world",  mpu6050_get_linear_accel_in_world, METH_NOARGS,
      "Get linear acceleration in world"},
+    {"get_x_gyro_offset",  mpu60050_get_x_gyro_offset, METH_NOARGS,
+     "Get X gyro offset"},
+    {"get_y_gyro_offset",  mpu60050_get_y_gyro_offset, METH_NOARGS,
+     "Get Y gyro offset"},
+    {"get_z_gyro_offset",  mpu60050_get_z_gyro_offset, METH_NOARGS,
+     "Get Z gyro offset"},
+    {"set_x_gyro_offset",  mpu60050_set_x_gyro_offset, METH_VARARGS,
+     "set X gyro offset"},
+    {"set_y_gyro_offset",  mpu60050_set_y_gyro_offset, METH_VARARGS,
+     "Set Y gyro offset"},
+    {"set_z_gyro_offset",  mpu60050_set_z_gyro_offset, METH_VARARGS,
+     "Set Z gyro offset"},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
@@ -74,7 +92,7 @@ mpu6050_initialize(PyObject *self, PyObject *args)
     // load and configure the DMP
     // printf("Initializing DMP...\n");
     devStatus = mpu.dmpInitialize();
-   
+
     // make sure it worked (returns 0 if so)
     if (devStatus == 0)
     {
@@ -101,9 +119,12 @@ mpu6050_initialize(PyObject *self, PyObject *args)
         // 2 = DMP configuration updates failed
         // (if it's going to break, usually the code will be 1)
         // printf("DMP Initialization failed (code %d)\n", devStatus);
+	char err_str[64];
+        snprintf(err_str, sizeof(err_str), "DMP Initialization failed (code %d)\n", devStatus);
+	PyErr_SetString(PyExc_ValueError, err_str);
 	return NULL;
     }
-   
+
     Py_RETURN_NONE;
 }
 
@@ -112,15 +133,20 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
 {
     // if programming failed, don't try to do anything
     if (!dmpReady)
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
+
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
-   
+
     if (fifoCount == 1024)
     {
         // reset so we can continue cleanly
         mpu.resetFIFO();
         // printf("FIFO overflow!\n");
+	PyErr_SetString(PyExc_ValueError, "FIFO overflow!");
 	return NULL;
 	// otherwise, check for DMP data ready interrupt (this should happen frequently)
     }
@@ -132,7 +158,10 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
 	return Py_BuildValue("(f, f, f, f)", q.w, q.x, q.y, q.z);
     }
     else
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
 }
 
 static PyObject *
@@ -140,15 +169,20 @@ mpu6050_get_euler(PyObject *self, PyObject *args)
 {
     // if programming failed, don't try to do anything
     if (!dmpReady)
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
+
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
-   
+
     if (fifoCount == 1024)
     {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-        printf("FIFO overflow!\n");
+        // printf("FIFO overflow!\n");
+	PyErr_SetString(PyExc_ValueError, "FIFO overflow!");
 	return NULL;
 	// otherwise, check for DMP data ready interrupt (this should happen frequently)
     }
@@ -161,7 +195,10 @@ mpu6050_get_euler(PyObject *self, PyObject *args)
 	return Py_BuildValue("(f, f, f)", euler[0], euler[1], euler[2]);
     }
     else
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
 }
 
 static PyObject *
@@ -169,15 +206,19 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
 {
     // if programming failed, don't try to do anything
     if (!dmpReady)
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
-   
+
     if (fifoCount == 1024)
     {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-        printf("FIFO overflow!\n");
+        // printf("FIFO overflow!\n");
+	PyErr_SetString(PyExc_ValueError, "FIFO overflow!");
 	return NULL;
 	// otherwise, check for DMP data ready interrupt (this should happen frequently)
     }
@@ -191,7 +232,10 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
 	return Py_BuildValue("(f, f, f)", ypr[0], ypr[1], ypr[2]);
     }
     else
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
 }
 
 static PyObject *
@@ -199,15 +243,19 @@ mpu6050_get_linear_accel(PyObject *self, PyObject *args)
 {
     // if programming failed, don't try to do anything
     if (!dmpReady)
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
-   
+
     if (fifoCount == 1024)
     {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-        printf("FIFO overflow!\n");
+        // printf("FIFO overflow!\n");
+	PyErr_SetString(PyExc_ValueError, "FIFO overflow");
 	return NULL;
 	// otherwise, check for DMP data ready interrupt (this should happen frequently)
     }
@@ -215,7 +263,7 @@ mpu6050_get_linear_accel(PyObject *self, PyObject *args)
     {
         // read a packet from FIFO
         mpu.getFIFOBytes(fifoBuffer, packetSize);
-       
+
 	mpu.dmpGetQuaternion(&q, fifoBuffer);
 	mpu.dmpGetAccel(&aa, fifoBuffer);
 	mpu.dmpGetGravity(&gravity, &q);
@@ -223,7 +271,10 @@ mpu6050_get_linear_accel(PyObject *self, PyObject *args)
 	return Py_BuildValue("(i, i, i)", aaReal.x, aaReal.y, aaReal.z);
     }
     else
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
 }
 
 static PyObject *
@@ -231,15 +282,19 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
 {
     // if programming failed, don't try to do anything
     if (!dmpReady)
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
-   
+
     if (fifoCount == 1024)
     {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-        printf("FIFO overflow!\n");
+        // printf("FIFO overflow!\n");
+	PyErr_SetString(PyExc_ValueError, "FIFO overflow");
 	return NULL;
 	// otherwise, check for DMP data ready interrupt (this should happen frequently)
     }
@@ -247,7 +302,7 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
     {
         // read a packet from FIFO
         mpu.getFIFOBytes(fifoBuffer, packetSize);
-       
+
 	mpu.dmpGetQuaternion(&q, fifoBuffer);
 	mpu.dmpGetAccel(&aa, fifoBuffer);
 	mpu.dmpGetGravity(&gravity, &q);
@@ -255,7 +310,58 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
 	return Py_BuildValue("(i, i, i)", aaWorld.x, aaWorld.y, aaWorld.z);
     }
     else
+    {
+	PyErr_SetString(PyExc_ValueError, "");
 	return NULL;
+    }
+}
+
+static PyObject *
+mpu60050_get_x_gyro_offset(PyObject *self, PyObject *args)
+{
+    return Py_BuildValue("I", (unsigned int) mpu.getXGyroOffset());
+}
+
+static PyObject *
+mpu60050_get_y_gyro_offset(PyObject *self, PyObject *args)
+{
+    return Py_BuildValue("I", (unsigned int) mpu.getYGyroOffset());
+}
+
+static PyObject *
+mpu60050_get_z_gyro_offset(PyObject *self, PyObject *args)
+{
+    return Py_BuildValue("I", (unsigned int) mpu.getZGyroOffset());
+}
+
+static PyObject *
+mpu60050_set_x_gyro_offset(PyObject *self, PyObject *args)
+{
+    unsigned char offset;
+    if(!PyArg_ParseTuple(args, "b", &offset))
+	return NULL;
+    mpu.setXGyroOffset(offset);
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+mpu60050_set_y_gyro_offset(PyObject *self, PyObject *args)
+{
+    unsigned char offset;
+    if(!PyArg_ParseTuple(args, "b", &offset))
+	return NULL;
+    mpu.setYGyroOffset(offset);
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+mpu60050_set_z_gyro_offset(PyObject *self, PyObject *args)
+{
+    unsigned char offset;
+    if(!PyArg_ParseTuple(args, "b", &offset))
+	return NULL;
+    mpu.setZGyroOffset(offset);
+    Py_RETURN_NONE;
 }
 
 #if 0
@@ -275,7 +381,7 @@ void loop()
     } else if (fifoCount >= 42) {
         // read a packet from FIFO
         mpu.getFIFOBytes(fifoBuffer, packetSize);
-       
+
         #ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
             mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -315,7 +421,7 @@ void loop()
             mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
             printf("aworld %6d %6d %6d    ", aaWorld.x, aaWorld.y, aaWorld.z);
         #endif
-   
+
         printf("\n");
     }
 }
