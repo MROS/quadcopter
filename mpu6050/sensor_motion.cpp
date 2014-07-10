@@ -192,7 +192,7 @@ mpu6050_get_euler(PyObject *self, PyObject *args)
 
 	if (fifoCount < 24)
 	    usleep(100000);
-	else if(fifoCount == 1000)
+	else if(fifoCount == 1024)
 	{
             mpu.resetFIFO();
 	    usleep(100000);
