@@ -155,10 +155,10 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
     }
 
     // get current FIFO count
-    fifoCount = mpu.getFIFOCount();
 
     while(1)
     {
+	fifoCount = mpu.getFIFOCount();
 	if (fifoCount < 24)
 	{
 	    // printf("usleep\n");
@@ -169,7 +169,7 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
 	{
             mpu.resetFIFO();
 	    usleep(100000);
-            fifoCount = mpu.getFIFOCount();
+            // fifoCount = mpu.getFIFOCount();
 	}
 	else
 	{
