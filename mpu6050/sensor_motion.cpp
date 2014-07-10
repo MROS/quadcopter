@@ -266,6 +266,7 @@ mpu6050_get_linear_accel(PyObject *self, PyObject *args)
 	}
 	else
 	{
+	    mpu.getFIFOBytes(fifoBuffer, packetSize);
 	    mpu.dmpGetQuaternion(&q, fifoBuffer);
 	    mpu.dmpGetAccel(&aa, fifoBuffer);
 	    mpu.dmpGetGravity(&gravity, &q);
@@ -299,6 +300,7 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
 	}
 	else
 	{
+	    mpu.getFIFOBytes(fifoBuffer, packetSize);
 	    mpu.dmpGetQuaternion(&q, fifoBuffer);
 	    mpu.dmpGetAccel(&aa, fifoBuffer);
 	    mpu.dmpGetGravity(&gravity, &q);
