@@ -217,6 +217,7 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
 	PyErr_SetString(PyExc_ValueError, "DMP not ready");
 	return NULL;
     }
+    
     while(1)
     {
 	// get current FIFO count
@@ -224,7 +225,7 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
 
 	if (fifoCount < 24)
 	    usleep(100000);
-	else if(fifoCount == 1000)
+	else if(fifoCount == 1024)
 	{
             mpu.resetFIFO();
 	    usleep(100000);
