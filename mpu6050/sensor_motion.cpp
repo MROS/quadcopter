@@ -270,7 +270,7 @@ mpu6050_get_linear_accel(PyObject *self, PyObject *args)
 	    mpu.dmpGetAccel(&aa, fifoBuffer);
 	    mpu.dmpGetGravity(&gravity, &q);
 	    mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
-	    return Py_BuildValue("(i, i, i)", aaReal.x, aaReal.y, aaReal.z);
+	    return Py_BuildValue("(h, h, h)", aaReal.x, aaReal.y, aaReal.z);
 	}
     }
 }
@@ -303,7 +303,7 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
 	    mpu.dmpGetAccel(&aa, fifoBuffer);
 	    mpu.dmpGetGravity(&gravity, &q);
 	    mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
-	    return Py_BuildValue("(i, i, i)", aaWorld.x, aaWorld.y, aaWorld.z);
+	    return Py_BuildValue("(h, h, h)", aaWorld.x, aaWorld.y, aaWorld.z);
 	}
     }
 }
