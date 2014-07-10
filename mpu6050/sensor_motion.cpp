@@ -154,22 +154,17 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
 	return NULL;
     }
 
-    // get current FIFO count
 
     while(1)
     {
+	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
 	if (fifoCount < 24)
-	{
-	    // printf("usleep\n");
 	    usleep(100000);
-            // fifoCount = mpu.getFIFOCount();
-	}
 	else if(fifoCount == 1024)
 	{
             mpu.resetFIFO();
 	    usleep(100000);
-            // fifoCount = mpu.getFIFOCount();
 	}
 	else
 	{
@@ -178,28 +173,6 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
 	    return Py_BuildValue("(f, f, f, f)", q.w, q.x, q.y, q.z);
 	}
     }
-
-    // if (fifoCount == 1024)
-    // {
-    //     // reset so we can continue cleanly
-    //     mpu.resetFIFO();
-    //     // printf("FIFO overflow!\n");
-    // 	PyErr_SetString(PyExc_ValueError, "FIFO overflow!");
-    // 	return NULL;
-    // 	// otherwise, check for DMP data ready interrupt (this should happen frequently)
-    // }
-    // else if (fifoCount >= 42)
-    // {
-    //     // read a packet from FIFO
-    //     mpu.getFIFOBytes(fifoBuffer, packetSize);
-    // 	mpu.dmpGetQuaternion(&q, fifoBuffer);
-    // 	return Py_BuildValue("(f, f, f, f)", q.w, q.x, q.y, q.z);
-    // }
-    // else
-    // {
-    // 	PyErr_SetString(PyExc_ValueError, "");
-    // 	return NULL;
-    // }
 }
 
 static PyObject *
@@ -215,39 +188,23 @@ mpu6050_get_euler(PyObject *self, PyObject *args)
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
 
-    while(fifoCount < 24 || fifoCount == 1024) {
-	if (fifoCount < 24) {
-	    printf("usleep\n");
+    while(1)
+    {
+	if (fifoCount < 24)
 	    usleep(100000);
-            fifoCount = mpu.getFIFOCount();
-	} else {
+	else if(fifoCount == 1000)
+	{
             mpu.resetFIFO();
 	    usleep(100000);
-            fifoCount = mpu.getFIFOCount();
 	}
-    }
-
-    if (fifoCount == 1024)
-    {
-        // reset so we can continue cleanly
-        mpu.resetFIFO();
-        // printf("FIFO overflow!\n");
-	PyErr_SetString(PyExc_ValueError, "FIFO overflow!");
-	return NULL;
-	// otherwise, check for DMP data ready interrupt (this should happen frequently)
-    }
-    else if (fifoCount >= 42)
-    {
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
-	mpu.dmpGetQuaternion(&q, fifoBuffer);
-	mpu.dmpGetEuler(euler, &q);
-	return Py_BuildValue("(f, f, f)", euler[0], euler[1], euler[2]);
-    }
-    else
-    {
-	PyErr_SetString(PyExc_ValueError, "");
-	return NULL;
+	else
+	{
+	    // read a packet from FIFO
+	    mpu.getFIFOBytes(fifoBuffer, packetSize);
+	    mpu.dmpGetQuaternion(&q, fifoBuffer);
+	    mpu.dmpGetEuler(euler, &q);
+	    return Py_BuildValue("(f, f, f)", euler[0], euler[1], euler[2]);
+	}
     }
 }
 
@@ -260,43 +217,27 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
 	PyErr_SetString(PyExc_ValueError, "DMP not ready");
 	return NULL;
     }
-    // get current FIFO count
-    fifoCount = mpu.getFIFOCount();
+    while(1)
+    {
+	// get current FIFO count
+	fifoCount = mpu.getFIFOCount();
 
-    while(fifoCount < 24 || fifoCount == 1024) {
-	if (fifoCount < 24) {
-	    printf("usleep\n");
+	if (fifoCount < 24)
 	    usleep(100000);
-            fifoCount = mpu.getFIFOCount();
-	} else {
+	else if(fifoCount == 1000)
+	{
             mpu.resetFIFO();
 	    usleep(100000);
-            fifoCount = mpu.getFIFOCount();
 	}
-    }
-
-    if (fifoCount == 1024)
-    {
-        // reset so we can continue cleanly
-        mpu.resetFIFO();
-        // printf("FIFO overflow!\n");
-	PyErr_SetString(PyExc_ValueError, "FIFO overflow!");
-	return NULL;
-	// otherwise, check for DMP data ready interrupt (this should happen frequently)
-    }
-    else if (fifoCount >= 42)
-    {
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
-	mpu.dmpGetQuaternion(&q, fifoBuffer);
-	mpu.dmpGetGravity(&gravity, &q);
-	mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-	return Py_BuildValue("(f, f, f)", ypr[0] * 180 / M_PI, ypr[1] * 180 / M_PI, ypr[2] * 180 / M_PI);
-    }
-    else
-    {
-	PyErr_SetString(PyExc_ValueError, "");
-	return NULL;
+	else
+	{
+	    // read a packet from FIFO
+	    mpu.getFIFOBytes(fifoBuffer, packetSize);
+	    mpu.dmpGetQuaternion(&q, fifoBuffer);
+	    mpu.dmpGetGravity(&gravity, &q);
+	    mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+	    return Py_BuildValue("(f, f, f)", ypr[0], ypr[1], ypr[2]);
+	}
     }
 }
 
