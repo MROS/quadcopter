@@ -410,7 +410,7 @@ static PyObject *
 mpu60050_set_z_gyro_offset(PyObject *self, PyObject *args)
 {
     unsigned char offset;
-    if(!PyArg_ParseTuple(args, "b", &offset))
+    if(!PyArg_ParseTuple(args, "i", &offset))
 	return NULL;
     mpu.setZGyroOffset(offset);
     Py_RETURN_NONE;
