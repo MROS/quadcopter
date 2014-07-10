@@ -119,7 +119,6 @@ mpu6050_initialize(PyObject *self, PyObject *args)
         // 2 = DMP configuration updates failed
         // (if it's going to break, usually the code will be 1)
         // printf("DMP Initialization failed (code %d)\n", devStatus);
-	char err_str[64];
 	PyErr_Format(PyExc_ValueError, "DMP Initialization failed (code %d)", devStatus);
 	return NULL;
     }
@@ -133,7 +132,7 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
     // if programming failed, don't try to do anything
     if (!dmpReady)
     {
-	PyErr_SetString(PyExc_ValueError, "");
+	PyErr_SetString(PyExc_ValueError, "DMP not ready");
 	return NULL;
     }
 
@@ -169,7 +168,7 @@ mpu6050_get_euler(PyObject *self, PyObject *args)
     // if programming failed, don't try to do anything
     if (!dmpReady)
     {
-	PyErr_SetString(PyExc_ValueError, "");
+	PyErr_SetString(PyExc_ValueError, "DMP not ready");
 	return NULL;
     }
 
@@ -206,7 +205,7 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
     // if programming failed, don't try to do anything
     if (!dmpReady)
     {
-	PyErr_SetString(PyExc_ValueError, "");
+	PyErr_SetString(PyExc_ValueError, "DMP not ready");
 	return NULL;
     }
     // get current FIFO count
@@ -243,7 +242,7 @@ mpu6050_get_linear_accel(PyObject *self, PyObject *args)
     // if programming failed, don't try to do anything
     if (!dmpReady)
     {
-	PyErr_SetString(PyExc_ValueError, "");
+	PyErr_SetString(PyExc_ValueError, "DMP not ready");
 	return NULL;
     }
     // get current FIFO count
@@ -282,7 +281,7 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
     // if programming failed, don't try to do anything
     if (!dmpReady)
     {
-	PyErr_SetString(PyExc_ValueError, "");
+	PyErr_SetString(PyExc_ValueError, "DMP not ready");
 	return NULL;
     }
     // get current FIFO count
