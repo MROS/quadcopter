@@ -139,6 +139,18 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
 
+    while(fifoCount < 24 || fifoCount == 1024) {
+	if (fifoCount < 24) {
+	    printf("usleep\n");
+	    usleep(100000);
+            fifoCount = mpu.getFIFOCount();
+	} else {
+            mpu.resetFIFO();
+	    usleep(100000);
+            fifoCount = mpu.getFIFOCount();
+	}
+    }
+
     if (fifoCount == 1024)
     {
         // reset so we can continue cleanly
@@ -174,6 +186,18 @@ mpu6050_get_euler(PyObject *self, PyObject *args)
 
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
+
+    while(fifoCount < 24 || fifoCount == 1024) {
+	if (fifoCount < 24) {
+	    printf("usleep\n");
+	    usleep(100000);
+            fifoCount = mpu.getFIFOCount();
+	} else {
+            mpu.resetFIFO();
+	    usleep(100000);
+            fifoCount = mpu.getFIFOCount();
+	}
+    }
 
     if (fifoCount == 1024)
     {
@@ -211,6 +235,18 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
     // get current FIFO count
     fifoCount = mpu.getFIFOCount();
 
+    while(fifoCount < 24 || fifoCount == 1024) {
+	if (fifoCount < 24) {
+	    printf("usleep\n");
+	    usleep(100000);
+            fifoCount = mpu.getFIFOCount();
+	} else {
+            mpu.resetFIFO();
+	    usleep(100000);
+            fifoCount = mpu.getFIFOCount();
+	}
+    }
+
     if (fifoCount == 1024)
     {
         // reset so we can continue cleanly
@@ -227,7 +263,7 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
 	mpu.dmpGetQuaternion(&q, fifoBuffer);
 	mpu.dmpGetGravity(&gravity, &q);
 	mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-	return Py_BuildValue("(f, f, f)", ypr[0], ypr[1], ypr[2]);
+	return Py_BuildValue("(f, f, f)", ypr[0] * 180 / M_PI, ypr[1] * 180 / M_PI, ypr[2] * 180 / M_PI);
     }
     else
     {
