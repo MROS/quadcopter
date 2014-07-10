@@ -291,6 +291,7 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
 	    mpu.dmpGetQuaternion(&q, fifoBuffer);
 	    mpu.dmpGetAccel(&aa, fifoBuffer);
 	    mpu.dmpGetGravity(&gravity, &q);
+	    mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
 	    mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
 	    return Py_BuildValue("(h, h, h)", aaWorld.x, aaWorld.y, aaWorld.z);
 	}
