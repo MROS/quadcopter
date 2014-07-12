@@ -6,12 +6,16 @@ direction_map = {'a': 'left', 'd': 'right', 's': 'rear', 'w': 'front'}
 
 def controller():
 	while True:
-		print("command: init | take_off | dsn | all #speed | (a|s|d|w) #speed")
+
+		print("command: init | take_off | dsn | all #speed | (a|s|d|w) #speed | rollb")
+
 		command = raw_input()
 		if command == 'init':
-			my_quadcopter.init_motor()
+			my_quadcopter.init_hardware()
 		elif command == 'take_off':
 			my_quadcopter.take_off()
+		elif command == "rollb":
+			my_quadcopter.roll_balance()
 		elif command[0:3] == 'all':
 			[co, speed] = command.split(' ')
 			my_quadcopter.set_all_to(int(speed))

@@ -54,7 +54,7 @@ class Quad():
 
     def take_off(self):
         self.set_all_to(50)
-        
+
     def balance(self):
         # TODO: make quadcopter balance(stop in the air), wait for the study of IMU
         pass

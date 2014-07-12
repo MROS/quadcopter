@@ -126,7 +126,7 @@ class motor(object):
             self.__W = self.__WMin
         if self.__W > self.__WMax:
             self.__W = self.__WMax
-        PW = (1000 + (self.__W) * 10)
+        PW = int(1000 + (self.__W) * 10)
         # Set servo to xxx us
         if self.powered:
             self.__IO.set_servo(self.__pin, PW)
