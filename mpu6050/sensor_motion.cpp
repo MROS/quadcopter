@@ -32,6 +32,7 @@ float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 static PyObject *mpu6050_initialize(PyObject *self, PyObject *args);
+static PyObject *mpu6050_get_motion(PyObject *self, PyObject *args);
 static PyObject *mpu6050_get_quaternion(PyObject *self, PyObject *args);
 static PyObject *mpu6050_get_euler(PyObject *self, PyObject *args);
 static PyObject *mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args);
@@ -53,6 +54,8 @@ static PyObject *mpu60050_set_z_accel_offset(PyObject *self, PyObject *args);
 static PyMethodDef methods[] = {
     {"initialize",  mpu6050_initialize, METH_NOARGS,
      "Initialize MPU6050 chip"},
+    {"get_motion",  mpu6050_get_motion, METH_NOARGS,
+     "Get acceleration and gyroscope values on three axises"},
     {"get_quaternion",  mpu6050_get_quaternion, METH_NOARGS,
      "Get quaternion"},
     {"get_euler",  mpu6050_get_euler, METH_NOARGS,
@@ -129,6 +132,14 @@ mpu6050_initialize(PyObject *self, PyObject *args)
     }
 
     Py_RETURN_NONE;
+}
+
+static PyObject *
+mpu6050_get_motion(PyObject *self, PyObject *args)
+{
+    int16_t ax, ay, az, gx, gy, gz;
+    mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    return Py_BuildValue("(h, h, h, h, h, h)", ax, ay, az, gx, gy, gz);
 }
 
 static PyObject *
