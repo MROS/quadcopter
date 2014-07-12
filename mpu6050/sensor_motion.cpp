@@ -159,13 +159,8 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
 
-	if (fifoCount < 42)
-	    usleep(100000);
-	else if(fifoCount == 1024)
-	{
+	if(fifoCount == 1024)
             mpu.resetFIFO();
-	    usleep(100000);
-	}
 	else
 	{
 	    mpu.getFIFOBytes(fifoBuffer, packetSize);
@@ -190,13 +185,8 @@ mpu6050_get_euler(PyObject *self, PyObject *args)
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
 
-	if (fifoCount < 42)
-	    usleep(100000);
-	else if(fifoCount == 1024)
-	{
+	if(fifoCount == 1024)
             mpu.resetFIFO();
-	    usleep(100000);
-	}
 	else
 	{
 	    // read a packet from FIFO
@@ -223,13 +213,8 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
 
-	if (fifoCount < 42)
-	    usleep(100000);
-	else if(fifoCount == 1024)
-	{
+	if(fifoCount == 1024)
             mpu.resetFIFO();
-	    usleep(100000);
-	}
 	else
 	{
 	    // read a packet from FIFO
@@ -257,13 +242,8 @@ mpu6050_get_linear_accel(PyObject *self, PyObject *args)
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
 
-	if (fifoCount < 42)
-	    usleep(100000);
-	else if(fifoCount == 1024)
-	{
+	if(fifoCount == 1024)
             mpu.resetFIFO();
-	    usleep(100000);
-	}
 	else
 	{
 	    mpu.getFIFOBytes(fifoBuffer, packetSize);
@@ -291,13 +271,8 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
 	// get current FIFO count
 	fifoCount = mpu.getFIFOCount();
 
-	if (fifoCount < 42)
-	    usleep(100000);
-	else if(fifoCount == 1024)
-	{
+	if(fifoCount == 1024)
             mpu.resetFIFO();
-	    usleep(100000);
-	}
 	else
 	{
 	    mpu.getFIFOBytes(fifoBuffer, packetSize);
