@@ -2,6 +2,7 @@ import mpu6050.mpu6050 as mpu6050
 from motor import motor
 import time
 import math
+import config
 
 def radius_to_angle(x):
 	return x * 180 / math.pi
@@ -15,18 +16,44 @@ def radius_to_angle(x):
 # Once you know these, you can start to write your control process! Such as balance, and all kinds of moving.
 #!/usr/bin/python
 
-# while True:
-	#print('q %f\t%f\t%f\t%f' % mpu6050.get_quaternion())
-	#print('e %f\t%f\t%f' % mpu6050.get_euler())
-	# ypr = mpu6050.get_yaw_pitch_roll()
-	# print(ypr[0] * 180 / 3.14159, "\t", ypr[1] * 180 / 3.14159, "\t", ypr[2] * 180 / 3.14159)
-	#print('y %f\t%f\t%f' % mpu6050.get_yaw_pitch_roll())
-	#print('a %i\t%i\t%i' % mpu6050.get_linear_accel())
-	#print('w %i\t%i\t%i' % mpu6050.get_linear_accel_in_world()))
+class PIDcontrol:
+	def __init__(self, _kp, _ki, _kd, _pwMax, _pwMin):
+		assert _pwMax > _pwMin , 'pwMax should larger than pwMin'
+		self.kp = _kp
+		self.ki = _kd
+		self.kd = _kd
+		self.pwMax = _pwMax
+		self.pwMin = _pwMin
+		self.tp = time.time() * 1000
+		self.pError = 0
+		self.I_sum = 0
+	def compute(self, mError):
+		tn = time.time() * 1000
+		dt = tn - self.tp
+		self.tp = tn
+
+		p = self.kp * mError
+		d = self.kd * (mError - self.pError) * 1000 / dt
+		i = self.I_sum + self.ki * mError * dt / 1000
+		u = p + d + i
+
+		print("mError=%f, p=%f, i=%f, d=%f" % (mError, p, i, d))
+
+		self.I_sum = i
+
+		if u > self.pwMax:
+			u = self.pwMax
+		elif u < self.pwMin:
+			u = self.pwMin
+
+		return u
 
 class quadcopter(object):
 	def __init__(self):
 		# setting motors
+		self.rate_pid = PIDcontrol(config.ANGLE_KP, config.ANGLE_KI, config.ANGLE_KD, config.ANGLE_MAX, config.ANGLE_MIN)
+		self.motor_pid = PIDcontrol(config.RATE_KP, config.RATE_KI, config.RATE_KD, config.RATE_MAX, config.RATE_MIN)
+
 		self.motor_standard = 35
 		self.motors = {'left' : motor('left', 25, simulation=False),
 				'right' : motor('right', 23, simulation=False),
@@ -70,6 +97,27 @@ class quadcopter(object):
 	def take_off(self):
 		self.set_all_to(50)
 
+	def keep_balance(self):
+		while True:
+			(yaw, pitch, roll) = mpu6050.get_yaw_pitch_roll()
+			(ax, ay, az, roll_s, pitch_s, yaw_s) = mpu6050.get_motion()
+			roll_s = -roll_s
+			
+			roll = roll * 180 / math.pi;
+			print("roll: %f" % roll)
+			if roll != roll:
+				continue
+			desired_rate = self.rate_pid.compute(roll)
+			roll_s = roll_s / 131.0
+			print("desired rate: %f, roll_s: %f" % (desired_rate, roll_s))
+			desired_motor = int(self.motor_pid.compute(desired_rate - roll_s))
+
+			#self.set_unique_to('left', self.motor_standard + desired_motor)
+			#self.set_unique_to('right', self.motor_standard - desired_motor)
+			print("desired_motor: %d" % desired_motor)
+			time.sleep(0.1)
+			
+
 	def roll_balance(self):
 		self.set_unique_to('left', self.motor_standard)
 		self.set_unique_to('right', self.motor_standard)
@@ -93,3 +141,4 @@ class quadcopter(object):
 		for w in range(s, 1, -1):
 			self.set_all_to(w)
 			time.sleep(0.5)
+

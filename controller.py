@@ -15,7 +15,7 @@ def controller():
 		elif command == 'take_off':
 			my_quadcopter.take_off()
 		elif command == "rollb":
-			my_quadcopter.roll_balance()
+			my_quadcopter.keep_balance()
 		elif command[0:3] == 'all':
 			[co, speed] = command.split(' ')
 			my_quadcopter.set_all_to(int(speed))
