@@ -93,3 +93,35 @@ class quadcopter(object):
 		for w in range(s, 1, -1):
 			self.set_all_to(w)
 			time.sleep(0.5)
+
+class PIDControl:
+        def __init__(self, _kP, _kI, _kD, out_min, out_max):
+                assert _out_max >= _out_min
+                self.kP = _kP
+                self.kI = _kI
+                self.kD = _kD
+                self.prev_time = time.time() * 1000
+                self.prev_error = 0.0
+                self.prev_i_val = 0.0
+                self.out_max = _out_max
+                self.out_min = _out_min
+
+        def compute(self, error):
+                curr_time = time.time() * 1000
+                dt = curr_time - self.prev_time
+
+                p_val = self.kP * error
+                i_val = self.prev_i_val + self.kI * error * dt / 1000.0
+                d_val = self.kD * (error - self.prev_error) * 1000.0 / dt
+                out = p_val + i_val + d_val
+
+                self.prev_time = curr_time
+                self.prev_error = error
+                self.prev_i_val = i_val
+
+                if out > self.out_max:
+                        out = self.out_max
+                elif out < self.out_min:
+                        out = self.out_min
+
+                return out
