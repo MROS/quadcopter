@@ -161,7 +161,7 @@ mpu6050_get_quaternion(PyObject *self, PyObject *args)
 
 	if(fifoCount == 1024)
             mpu.resetFIFO();
-	else
+	else if(fifoCount >= 42)
 	{
 	    mpu.getFIFOBytes(fifoBuffer, packetSize);
 	    mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -187,7 +187,7 @@ mpu6050_get_euler(PyObject *self, PyObject *args)
 
 	if(fifoCount == 1024)
             mpu.resetFIFO();
-	else
+	else if(fifoCount >= 42)
 	{
 	    // read a packet from FIFO
 	    mpu.getFIFOBytes(fifoBuffer, packetSize);
@@ -215,7 +215,7 @@ mpu6050_get_yaw_pitch_roll(PyObject *self, PyObject *args)
 
 	if(fifoCount == 1024)
             mpu.resetFIFO();
-	else
+	else if(fifoCount >= 42)
 	{
 	    // read a packet from FIFO
 	    mpu.getFIFOBytes(fifoBuffer, packetSize);
@@ -244,7 +244,7 @@ mpu6050_get_linear_accel(PyObject *self, PyObject *args)
 
 	if(fifoCount == 1024)
             mpu.resetFIFO();
-	else
+	else if(fifoCount >= 42)
 	{
 	    mpu.getFIFOBytes(fifoBuffer, packetSize);
 	    mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -273,7 +273,7 @@ mpu6050_get_linear_accel_in_world(PyObject *self, PyObject *args)
 
 	if(fifoCount == 1024)
             mpu.resetFIFO();
-	else
+	else if(fifoCount >= 42)
 	{
 	    mpu.getFIFOBytes(fifoBuffer, packetSize);
 	    mpu.dmpGetQuaternion(&q, fifoBuffer);
