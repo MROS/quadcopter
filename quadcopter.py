@@ -4,6 +4,10 @@ import time
 import math
 import config
 
+YAW = 0
+PITCH = 1
+ROLL = 2
+
 def radius_to_angle(x):
 	return x * 180 / math.pi
 
@@ -33,8 +37,8 @@ class PIDcontrol:
 		self.tp = tn
 
 		p = self.kp * mError
-		d = self.kd * (mError - self.pError) * 1000 / dt
 		i = self.I_sum + self.ki * mError * dt / 1000
+		d = self.kd * (mError - self.pError) * 1000 / dt
 		u = p + d + i
 
 		print("mError=%f, p=%f, i=%f, d=%f" % (mError, p, i, d))
@@ -46,15 +50,27 @@ class PIDcontrol:
 		elif u < self.pwMin:
 			u = self.pwMin
 
-		return u
+		return {'p': p, 'i': i, 'd': d, 'u': u}
+
+class balance_info:
+	def __init__(self, angle, rate, desired_rate_pidu, motors_speed):
+		self.angle = angle
+		self.rate = rate
+		self.desired_rate_pidu = desired_rate_pidu
+		self.motors_speed = motors_speed
 
 class quadcopter(object):
 	def __init__(self):
 		# setting motors
-		self.rate_pid = PIDcontrol(config.ANGLE_KP, config.ANGLE_KI, config.ANGLE_KD, config.ANGLE_MAX, config.ANGLE_MIN)
-		self.motor_pid = PIDcontrol(config.RATE_KP, config.RATE_KI, config.RATE_KD, config.RATE_MAX, config.RATE_MIN)
+		self.rate_pid = []
+		self.motor_pid = []
+		for i in range(0, 3):
+			self.rate_pid.append(PIDcontrol(config.ANGLE_KP, config.ANGLE_KI, config.ANGLE_KD, config.ANGLE_MAX, config.ANGLE_MIN))
+			self.motor_pid.append(PIDcontrol(config.RATE_KP, config.RATE_KI, config.RATE_KD, config.RATE_MAX, config.RATE_MIN))
 
 		self.motor_standard = 35
+		self.roll_standard = 0
+		self.pitch_standard = 0
 		self.motors = {'left' : motor('left', 25, simulation=False),
 				'right' : motor('right', 23, simulation=False),
 				'rear' : motor('rear', 24, simulation=False),
@@ -99,34 +115,60 @@ class quadcopter(object):
 
 	def keep_balance(self):
 		while True:
-			(yaw, pitch, roll) = mpu6050.get_yaw_pitch_roll()
-			(ax, ay, az, roll_s, pitch_s, yaw_s) = mpu6050.get_motion()
-			roll_s = -roll_s
-			pitch_s = -pitch_s
+			self.a_balance()
 			
-			roll = roll * 180 / math.pi;
-			pitch = pitch * 180 / math.pi;
+	def a_balance(self):
+		
+		# angle originally arranged by [yaw, pitch, roll]
+		# rate originally arranged by [roll, pitch, yaw]
+		angle = list(mpu6050.get_yaw_pitch_roll())
+		angle = map(lambda x: -x / 131.0, angle)
+		rate = list(mpu6050.get_motion())[3:6]
+		rate = map(lambda x: x * 180 / math.pi, rate)
+		
+		rate[0], rate[2] = rate[2], rate[0]
+		# now rate and angle are all arranged by [yaw, pitch, roll]
+		
+		
+		#	roll_s = -roll_s
+		#	pitch_s = -pitch_s
+		#	roll = roll * 180 / math.pi;
+		#	pitch = pitch * 180 / math.pi;
+		#	roll_s = roll_s / 131.0
+		#	pitch_s = pitch_s / 131.0
 
-			print("pitch: %f, roll: %f" % (pitch, roll))
-			if roll != roll or pitch != pitch:
-				continue
-			desired_roll_rate = self.rate_pid.compute(roll)
-			desired_pitch_rate = self.rate_pid.compute(pitch)
-			roll_s = roll_s / 131.0
-			pitch_s = pitch_s / 131.0
-			print("desired roll rate: %f, roll_s: %f" % (desired_roll_rate, roll_s))
-			print("desired pitch rate: %f, pitch_s: %f" % (desired_pitch_rate, pitch_s))
-			desired_roll_motor = int(self.motor_pid.compute(desired_roll_rate - roll_s))
-			desired_pitch_motor = int(self.motor_pid.compute(desired_pitch_rate - pitch_s))
+		#if roll != roll or pitch != pitch:
+		#	continue
+		
+		desired_rate_pidu = []
+		for i in range(0, 3):
+			desired_rate_pidu.append(self.rate_pid[i].compute(angle[i]))
+		
+		desired_rate = [x['u'] for x in desired_rate_pidu]
+		
+		desired_motor_pidu = []
+		for i in range(0, 3):
+			desired_motor_pidu.append(self.motor_pid[i].compute(desired_rate[i] - rate[i]))
+		
+		desired_motor = [x['u'] for x in desired_motor_pidu]
 
-			self.set_unique_to('left', self.motor_standard + desired_roll_motor)
-			self.set_unique_to('right', self.motor_standard - desired_roll_motor)
+		self.set_unique_to('left', self.motor_standard + desired_motor[ROLL])
+		self.set_unique_to('right', self.motor_standard - desired_motor[ROLL])
+		self.set_unique_to('front', self.motor_standard + desired_motor[PITCH])
+		self.set_unique_to('rear', self.motor_standard - desired_motor[PITCH])
+		
+		motor_speed = {}
+		for (name, motor) in self.motors:
+			motor_speed[name] = motor.getW()
 
-			self.set_unique_to('front', self.motor_standard + desired_pitch_motor)
-			self.set_unique_to('rear', self.motor_standard - desired_pitch_motor)
-
-			print("desired_roll_motor: %d" % desired_roll_motor)
-			print("desired_pitch_motor: %d" % desired_pitch_motor)
+		print("pitch: %f, roll: %f" % (angle[PITCH], angle[ROLL]))
+		print("desired roll rate: %f, really roll rate: %f" % (desired_rate[ROLL], rate[ROLL]))
+		print("desired pitch rate: %f, pitch_s: %f" % (desired_rate[PITCH], rate[PITCH]))
+		print("desired_roll_motor: %d" % desired_motor[ROLL])
+		print("desired_pitch_motor: %d" % desired_motor[PITCH])
+		
+		
+		return balance_info(angle, rate, desired_rate_pidu, motor_speed)
 			
 
 	def roll_balance(self):
