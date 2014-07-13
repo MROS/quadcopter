@@ -122,18 +122,18 @@ class quadcopter(object):
 		# angle originally arranged by [yaw, pitch, roll]
 		# rate originally arranged by [roll, pitch, yaw]
 		angle = list(mpu6050.get_yaw_pitch_roll())
-		angle = map(lambda x: -x / 131.0, angle)
+		angle = map(lambda x: x * 180 / math.pi, angle)
 		rate = list(mpu6050.get_motion())[3:6]
-		rate = map(lambda x: x * 180 / math.pi, rate)
+		rate = map(lambda x: -x / 131.0, rate)
 		
 		rate[0], rate[2] = rate[2], rate[0]
 		# now rate and angle are all arranged by [yaw, pitch, roll]
 		
 		
-		#	roll_s = -roll_s
-		#	pitch_s = -pitch_s
 		#	roll = roll * 180 / math.pi;
 		#	pitch = pitch * 180 / math.pi;
+		#	roll_s = -roll_s
+		#	pitch_s = -pitch_s
 		#	roll_s = roll_s / 131.0
 		#	pitch_s = pitch_s / 131.0
 
@@ -150,7 +150,7 @@ class quadcopter(object):
 		for i in range(0, 3):
 			desired_motor_pidu.append(self.motor_pid[i].compute(desired_rate[i] - rate[i]))
 		
-		desired_motor = [x['u'] for x in desired_motor_pidu]
+		desired_motor = [int(x['u']) for x in desired_motor_pidu]
 
 		self.set_unique_to('left', self.motor_standard + desired_motor[ROLL])
 		self.set_unique_to('right', self.motor_standard - desired_motor[ROLL])
@@ -158,12 +158,12 @@ class quadcopter(object):
 		self.set_unique_to('rear', self.motor_standard - desired_motor[PITCH])
 		
 		motor_speed = {}
-		for (name, motor) in self.motors:
+		for (name, motor) in self.motors.items():
 			motor_speed[name] = motor.getW()
 
 		print("pitch: %f, roll: %f" % (angle[PITCH], angle[ROLL]))
 		print("desired roll rate: %f, really roll rate: %f" % (desired_rate[ROLL], rate[ROLL]))
-		print("desired pitch rate: %f, pitch_s: %f" % (desired_rate[PITCH], rate[PITCH]))
+		print("desired pitch rate: %f, really pitch rate: %f" % (desired_rate[PITCH], rate[PITCH]))
 		print("desired_roll_motor: %d" % desired_motor[ROLL])
 		print("desired_pitch_motor: %d" % desired_motor[PITCH])
 		
