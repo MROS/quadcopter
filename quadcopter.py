@@ -1,4 +1,5 @@
 import mpu6050.mpu6050 as mpu6050
+import sys
 from motor import motor
 import time
 import math
@@ -41,7 +42,7 @@ class PIDcontrol:
 		d = self.kd * (mError - self.pError) * 1000 / dt
 		u = p + d + i
 
-		print("mError=%f, p=%f, i=%f, d=%f" % (mError, p, i, d))
+		sys.stderr.write("mError=%f, p=%f, i=%f, d=%f" % (mError, p, i, d))
 
 		self.I_sum = i
 
@@ -68,9 +69,8 @@ class quadcopter(object):
 			self.rate_pid.append(PIDcontrol(config.ANGLE_KP, config.ANGLE_KI, config.ANGLE_KD, config.ANGLE_MAX, config.ANGLE_MIN))
 			self.motor_pid.append(PIDcontrol(config.RATE_KP, config.RATE_KI, config.RATE_KD, config.RATE_MAX, config.RATE_MIN))
 
-		self.motor_standard = 35
-		self.roll_standard = 0
-		self.pitch_standard = 0
+		self.motor_standard = 10
+		self.angle_standard = [0,3,0]
 		self.motors = {'left' : motor('left', 25, simulation=False),
 				'right' : motor('right', 23, simulation=False),
 				'rear' : motor('rear', 24, simulation=False),
@@ -83,7 +83,8 @@ class quadcopter(object):
 		# init motors
 		print('***Disconnect ESC power')
 		print('***then press ENTER')
-		res = raw_input()
+		# res = raw_input()
+		time.sleep(2)
 		for mo in self.motors.values():
 			mo.start()
 			mo.setW(100)
@@ -92,13 +93,14 @@ class quadcopter(object):
 		print('***Connect ESC Power')
 		print('***Wait beep-beep')
 		print('***then press ENTER')
-		res = raw_input()
+		# res = raw_input()
+		time.sleep(2)
 		for mo in self.motors.values():
 			mo.setW(0)
 		print('***Wait N beep for battery cell')
 		print('***Wait beeeeeep for ready')
 		print('***then press ENTER')
-		res = raw_input()
+		time.sleep(2)
 
 	def set_all_to(self, s):
 		for mo in self.motors.values():
@@ -142,7 +144,7 @@ class quadcopter(object):
 		
 		desired_rate_pidu = []
 		for i in range(0, 3):
-			desired_rate_pidu.append(self.rate_pid[i].compute(angle[i]))
+			desired_rate_pidu.append(self.rate_pid[i].compute(angle[i] - self.angle_standard[i]))
 		
 		desired_rate = [x['u'] for x in desired_rate_pidu]
 		
@@ -161,30 +163,15 @@ class quadcopter(object):
 		for (name, motor) in self.motors.items():
 			motor_speed[name] = motor.getW()
 
-		print("pitch: %f, roll: %f" % (angle[PITCH], angle[ROLL]))
-		print("desired roll rate: %f, really roll rate: %f" % (desired_rate[ROLL], rate[ROLL]))
-		print("desired pitch rate: %f, really pitch rate: %f" % (desired_rate[PITCH], rate[PITCH]))
-		print("desired_roll_motor: %d" % desired_motor[ROLL])
-		print("desired_pitch_motor: %d" % desired_motor[PITCH])
+		sys.stderr.write("pitch: %f, roll: %f" % (angle[PITCH], angle[ROLL]))
+		sys.stderr.write("desired roll rate: %f, really roll rate: %f" % (desired_rate[ROLL], rate[ROLL]))
+		sys.stderr.write("desired pitch rate: %f, really pitch rate: %f" % (desired_rate[PITCH], rate[PITCH]))
+		sys.stderr.write("desired_roll_motor: %d" % desired_motor[ROLL])
+		sys.stderr.write("desired_pitch_motor: %d" % desired_motor[PITCH])
 		
 		
 		return balance_info(angle, rate, desired_rate_pidu, motor_speed)
-			
 
-	def roll_balance(self):
-		self.set_unique_to('left', self.motor_standard)
-		self.set_unique_to('right', self.motor_standard)
-		while True:
-			(tmp1, tmp2, roll) = mpu6050.get_yaw_pitch_roll()
-			error = int(radius_to_angle(roll) * 0.2)
-			left_speed = self.motors['left'].getW() + error
-			right_speed = self.motors['right'].getW() - error
-			self.set_unique_to('left', left_speed)
-			self.set_unique_to('right', right_speed)
-
-	def balance(self):
-		# TODO: make quadcopter balance(stop in the air), wait for the study of IMU
-		pass
 
 	def descend(self):
 		# TODO: It should have different behavior in different height and speed, wait for the study of IMU

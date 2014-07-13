@@ -38,15 +38,15 @@ class motor(object):
         try:
             from RPIO import PWM
             self.__IO = PWM.Servo()
+            PWM.set_loglevel(PWM.LOG_LEVEL_ERRORS)
         except ImportError:
             self.simulation = True
 
     def setDebug(self, debug):
         self.__debug = debug
+        # self.__logger.setLevel(logging.WARNING)
         #if self.__debug:
             #self.__logger.setLevel(logging.DEBUG)
-        #else:
-            #self.__logger.setLevel(logging.WARNING)
 
     def getDebug(self):
         return self.__debug
